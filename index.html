@@ -1,32 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jeu de la Vie - Vitesse en Temps Réel</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-    #gameCanvas { border: 1px solid #000; touch-action: none; }
-    .controls { margin-bottom: 10px; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      color: #333;
+    }
+    .controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.control-group {
+  display: flex;
+  align-items: center;
+  margin: 5px;
+}
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px 15px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+button:hover {
+  background-color: #45a049;
+}
+input[type="range"], input[type="number"], select {
+  padding: 5px;
+  margin: 0 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+    #gameCanvas {
+      border: 1px solid #000;
+      touch-action: none;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      background-color: #fff;
+    }
   </style>
 </head>
 <body>
   <h1>Jeu de la Vie - Vitesse en Temps Réel</h1>
   <div class="controls">
-    <button id="startBtn">Start</button>
-    <button id="stopBtn">Stop</button>
-    <button id="resetBtn">Reset</button>
-    Vitesse : <input type="range" id="speedSlider" min="50" max="1000" step="50" value="500">
-    Taille de la grille : <input type="number" id="gridSizeInput" min="10" max="100" value="50">
-    <button id="resizeBtn">Redimensionner</button>
-    <br><br>
-    Configuration de départ : 
-    <select id="patternSelect">
-      <option value="empty">Vide</option>
-      <option value="glider">Glider</option>
-      <option value="random">Aléatoire</option>
-    </select>
-    <button id="applyPatternBtn">Appliquer</button>
+    <div class="control-group">
+      <button id="startBtn">Start</button>
+      <button id="stopBtn">Stop</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+    <div class="control-group">
+      <label for="speedSlider">Vitesse :</label>
+      <input type="range" id="speedSlider" min="50" max="1000" step="50" value="500">
+    </div>
+    <div class="control-group">
+      <label for="gridSizeInput"></label>
+      <input type="number" id="gridSizeInput" min="10" max="100" value="50">
+      <button id="resizeBtn">Redim.</button>
+    </div>
+    <div class="control-group">
+      <label for="patternSelect"></label>
+      <select id="patternSelect">
+        <option value="empty">Vide</option>
+        <option value="glider">Glider</option>
+        <option value="random">Aléatoire</option>
+      </select>
+      <button id="applyPatternBtn">Config.</button>
+    </div>
   </div>
   <canvas id="gameCanvas" width="600" height="600"></canvas>
 
@@ -40,17 +92,14 @@
     let simulationTimeout = null;
     let running = false;
 
-    // Calcule le délai à appliquer en fonction de la valeur du slider
     function getIntervalDelay() {
       const slider = document.getElementById("speedSlider");
       const minSpeed = parseInt(slider.min);
       const maxSpeed = parseInt(slider.max);
       const sliderValue = parseInt(slider.value);
-      // Valeur basse = simulation lente, valeur haute = simulation rapide
       return maxSpeed + minSpeed - sliderValue;
     }
 
-    // Initialise la grille avec des cellules mortes (0)
     function initGrid() {
       grid = [];
       for (let i = 0; i < gridSize; i++) {
@@ -61,7 +110,6 @@
       }
     }
 
-    // Affiche la grille sur le canvas
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < gridSize; i++) {
@@ -74,7 +122,6 @@
       }
     }
 
-    // Calcule la prochaine génération en tenant compte du repliement (effet torique)
     function nextGeneration() {
       const newGrid = [];
       for (let i = 0; i < gridSize; i++) {
@@ -98,14 +145,12 @@
       drawGrid();
     }
 
-    // Boucle récursive qui lance chaque génération avec le délai courant
     function simulationStep() {
       if (!running) return;
       nextGeneration();
       simulationTimeout = setTimeout(simulationStep, getIntervalDelay());
     }
 
-    // Démarre la simulation
     function startSimulation() {
       if (!running) {
         running = true;
@@ -113,30 +158,25 @@
       }
     }
 
-    // Arrête la simulation
     function stopSimulation() {
       running = false;
       clearTimeout(simulationTimeout);
       simulationTimeout = null;
     }
 
-    // Met à jour la vitesse en temps réel
     function updateSpeed() {
       if (running) {
-        // Annule le délai en cours et en programme un nouveau
         clearTimeout(simulationTimeout);
         simulationTimeout = setTimeout(simulationStep, getIntervalDelay());
       }
     }
 
-    // Réinitialise la grille (et arrête la simulation)
     function resetGrid() {
       stopSimulation();
       initGrid();
       drawGrid();
     }
 
-    // Redimensionne la grille selon la taille saisie
     function resizeGrid() {
       stopSimulation();
       gridSize = parseInt(document.getElementById("gridSizeInput").value);
@@ -145,7 +185,6 @@
       drawGrid();
     }
 
-    // Applique une configuration de départ particulière
     function applyPattern() {
       resetGrid();
       const pattern = document.getElementById("patternSelect").value;
@@ -167,7 +206,6 @@
       drawGrid();
     }
 
-    // Permet d'ajouter ou d'effacer une cellule par clic ou touch lorsque la simulation est arrêtée
     function toggleCell(e) {
       if (running) return;
       const rect = canvas.getBoundingClientRect();
@@ -183,7 +221,6 @@
       }
     }
 
-    // Écouteurs d'événements
     document.getElementById("startBtn").addEventListener("click", startSimulation);
     document.getElementById("stopBtn").addEventListener("click", stopSimulation);
     document.getElementById("resetBtn").addEventListener("click", resetGrid);
@@ -194,10 +231,8 @@
       e.preventDefault();
       toggleCell(e);
     });
-    // L'événement "input" sur le slider met à jour la vitesse en temps réel
     document.getElementById("speedSlider").addEventListener("input", updateSpeed);
 
-    // Initialisation
     initGrid();
     drawGrid();
   </script>
